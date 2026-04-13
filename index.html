@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="PhraseZine" />
+  <meta name="theme-color" content="#4F46E5" />
+  <title>PhraseZine</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <nav id="bottom-nav">
+      <button class="nav-btn active" data-tab="library">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Library</span>
+      </button>
+      <button class="nav-btn" data-tab="categories">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <span>Categories</span>
+      </button>
+      <button class="nav-btn" data-tab="flashcards">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <span>Flashcards</span>
+      </button>
+      <button class="nav-btn" data-tab="stats">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Stats</span>
+      </button>
+    </nav>
+
+    <main id="main-content">
+      <!-- Library Tab -->
+      <section id="tab-library" class="tab active">
+        <header class="page-header">
+          <h1>PhraseZine</h1>
+          <div class="header-actions">
+            <button id="export-btn" class="icon-btn" title="Export">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+            <button id="add-phrase-btn" class="icon-btn primary" title="Add phrase">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+          </div>
+        </header>
+        <div class="search-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="search" id="search-input" placeholder="Search phrases..." />
+        </div>
+        <div id="category-filters" class="category-pills"></div>
+        <div id="phrase-list" class="phrase-list"></div>
+      </section>
+
+      <!-- Categories Tab -->
+      <section id="tab-categories" class="tab">
+        <header class="page-header">
+          <h1>Categories</h1>
+          <button id="add-category-btn" class="icon-btn primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </header>
+        <div id="category-list" class="category-list"></div>
+      </section>
+
+      <!-- Flashcards Tab -->
+      <section id="tab-flashcards" class="tab">
+        <div id="flashcard-setup">
+          <header class="page-header"><h1>Flashcards</h1></header>
+          <div class="setup-card">
+            <label class="field-label">Category</label>
+            <select id="fc-category-select" class="input-field">
+              <option value="all">All Phrases</option>
+            </select>
+            <label class="field-label" style="margin-top:16px">Start with</label>
+            <div class="segmented">
+              <button class="seg-btn active" data-lang="en">English</button>
+              <button class="seg-btn" data-lang="fr">French</button>
+            </div>
+            <div id="fc-count" class="fc-count-text"></div>
+            <button id="start-session-btn" class="btn-primary full-width">Start Session</button>
+          </div>
+        </div>
+        <div id="flashcard-session" class="hidden">
+          <div class="session-header">
+            <button id="end-session-btn" class="text-btn danger">End</button>
+            <span id="session-progress"></span>
+            <span id="session-timer" class="mono">00:00</span>
+          </div>
+          <div class="progress-bar"><div id="progress-fill"></div></div>
+          <div id="card-container">
+            <div id="flashcard" class="flashcard">
+              <div class="card-inner">
+                <div class="card-front">
+                  <div class="card-flag" id="card-front-flag"></div>
+                  <div class="card-text" id="card-front-text"></div>
+                </div>
+                <div class="card-back">
+                  <div class="card-flag" id="card-back-flag"></div>
+                  <div class="card-text" id="card-back-text"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card-hint">Tap to flip · Swipe to advance</div>
+          <div class="card-actions">
+            <button id="speak-btn" class="action-btn">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            </button>
+            <button id="next-card-btn" class="action-btn primary">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 16 16 12 12 8"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            </button>
+          </div>
+          <div id="session-complete" class="hidden">
+            <div class="complete-card">
+              <div class="complete-icon">✓</div>
+              <h2>Session complete!</h2>
+              <p id="complete-summary"></p>
+              <button id="done-session-btn" class="btn-primary">Done</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Stats Tab -->
+      <section id="tab-stats" class="tab">
+        <header class="page-header"><h1>Stats</h1></header>
+        <div id="stats-content"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Add/Edit Phrase Modal -->
+  <div id="phrase-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h2 id="modal-title">New Phrase</h2>
+        <button class="modal-close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="phrase-id" />
+        <div class="field-group">
+          <label class="field-label">English</label>
+          <div class="input-row">
+            <input type="text" id="input-english" class="input-field" placeholder="Enter English phrase" />
+            <button class="speak-inline" data-lang="en" title="Pronounce">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            </button>
+          </div>
+          <div class="validation-banner hidden" id="en-validation"></div>
+          <button class="translate-btn" id="translate-to-fr">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Translate to French (DeepL)
+          </button>
+        </div>
+        <div class="field-group">
+          <label class="field-label">French</label>
+          <div class="input-row">
+            <input type="text" id="input-french" class="input-field" placeholder="Enter French phrase" />
+            <button class="speak-inline" data-lang="fr" title="Pronounce">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            </button>
+          </div>
+          <div class="validation-banner hidden" id="fr-validation"></div>
+          <button class="translate-btn" id="translate-to-en">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Translate to English (DeepL)
+          </button>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Notes (optional)</label>
+          <textarea id="input-notes" class="input-field" rows="2" placeholder="Any notes..."></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Category</label>
+          <select id="input-category" class="input-field">
+            <option value="">None</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="save-phrase-btn" class="btn-primary full-width">Save Phrase</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Category Modal -->
+  <div id="category-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h2>New Category</h2>
+        <button class="modal-close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="field-group">
+          <label class="field-label">Name</label>
+          <input type="text" id="cat-name" class="input-field" placeholder="e.g. Verbs, Food, Places..." />
+        </div>
+        <div class="field-group">
+          <label class="field-label">Color</label>
+          <div id="color-picker" class="color-picker"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="save-category-btn" class="btn-primary full-width">Save Category</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/translate.js"></script>
+  <script src="js/validate.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js');
+    }
+  </script>
+</body>
+</html>
