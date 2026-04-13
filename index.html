@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="PhraseZine"/>
+<meta name="theme-color" content="#4F46E5"/>
+<title>PhraseZine</title>
+<link rel="manifest" href="./manifest.json"/>
+<link rel="apple-touch-icon" href="./icon-192.png"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#4F46E5;--accent-light:#EEF2FF;
+  --danger:#DC2626;--danger-light:#FEE2E2;
+  --success:#16A34A;--success-light:#DCFCE7;
+  --warn-light:#FEF9C3;--warn:#CA8A04;
+  --bg:#F8F7F4;--surface:#fff;
+  --border:rgba(0,0,0,0.1);
+  --text:#1A1A1A;--text2:#666;--text3:#999;
+  --r:12px;--rs:8px;
+  --safe:env(safe-area-inset-bottom,0px)
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#111;--surface:#1E1E1E;--border:rgba(255,255,255,0.1);
+  --text:#F0F0F0;--text2:#AAA;--text3:#666;--accent-light:#1E1B4B
+}}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:16px}
+#app{display:flex;flex-direction:column;height:100dvh}
+#nav{display:flex;background:var(--surface);border-top:.5px solid var(--border);padding-bottom:var(--safe);order:2;flex-shrink:0}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer}
+.nb.on{color:var(--accent)}
+#main{flex:1;overflow:hidden;order:1;position:relative}
+.tab{display:none;flex-direction:column;height:100%;overflow:hidden}
+.tab.on{display:flex}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px;background:var(--surface);border-bottom:.5px solid var(--border);flex-shrink:0}
+.ph h1{font-size:22px;font-weight:600}
+.ha{display:flex;gap:8px}
+.ib{width:36px;height:36px;border-radius:50%;border:.5px solid var(--border);background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ib.p{background:var(--accent);color:#fff;border-color:var(--accent)}
+.sb{display:flex;align-items:center;gap:8px;margin:10px 16px 6px;background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:0 12px;flex-shrink:0}
+.sb svg{color:var(--text3);flex-shrink:0}
+.sb input{flex:1;border:none;background:none;font-size:15px;color:var(--text);padding:10px 0;outline:none}
+.pills{display:flex;gap:8px;padding:6px 16px 10px;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill{padding:5px 14px;border-radius:100px;border:.5px solid var(--border);background:var(--surface);font-size:13px;color:var(--text2);white-space:nowrap;cursor:pointer;flex-shrink:0}
+.pill.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+#plist{flex:1;overflow-y:auto}
+.pi{display:flex;align-items:center;padding:12px 16px;border-bottom:.5px solid var(--border);gap:12px;background:var(--surface);cursor:pointer}
+.pi:active{background:var(--bg)}
+.pit{flex:1;min-width:0}
+.pen{font-size:15px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pfr{font-size:13px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.pbadge{font-size:11px;padding:2px 8px;border-radius:100px;margin-top:4px;display:inline-block}
+.pas{display:flex;gap:8px;flex-shrink:0}
+.ssm{width:32px;height:32px;border-radius:50%;border:.5px solid var(--border);background:none;color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.empty{text-align:center;padding:60px 24px;color:var(--text3);font-size:15px}
+#clist{flex:1;overflow-y:auto}
+.ci{display:flex;align-items:center;padding:14px 16px;border-bottom:.5px solid var(--border);background:var(--surface);gap:12px}
+.cdot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.cname{flex:1;font-size:15px;font-weight:500}
+.ccnt{font-size:13px;color:var(--text3)}
+.cdel{width:28px;height:28px;border-radius:50%;border:none;background:var(--danger-light);color:var(--danger);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.sc{margin:16px;background:var(--surface);border-radius:var(--r);border:.5px solid var(--border);padding:20px}
+.fl{display:block;font-size:13px;font-weight:500;color:var(--text2);margin-bottom:6px}
+.if{width:100%;padding:10px 12px;border:.5px solid var(--border);border-radius:var(--rs);background:var(--bg);color:var(--text);font-size:15px;outline:none;font-family:inherit}
+.if:focus{border-color:var(--accent)}
+textarea.if{resize:vertical}
+.seg{display:flex;border:.5px solid var(--border);border-radius:var(--rs);overflow:hidden}
+.sg{flex:1;padding:8px;border:none;background:none;color:var(--text2);font-size:14px;cursor:pointer}
+.sg.on{background:var(--accent);color:#fff}
+.fcc{font-size:13px;color:var(--text3);text-align:center;margin:12px 0}
+.bp{background:var(--accent);color:#fff;border:none;border-radius:var(--rs);padding:12px 20px;font-size:15px;font-weight:500;cursor:pointer}
+.bp:disabled{opacity:.4;cursor:not-allowed}
+.bp.fw{width:100%}
+.shdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;flex-shrink:0}
+.tb{background:none;border:none;font-size:15px;cursor:pointer;padding:4px 8px;border-radius:6px}
+.tb.d{color:var(--danger)}
+.mono{font-variant-numeric:tabular-nums;font-size:15px;color:var(--text2)}
+.pbar{height:3px;background:var(--border);margin:0 16px;border-radius:2px;flex-shrink:0}
+#pfill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s}
+#ccon{flex:1;display:flex;align-items:center;justify-content:center;padding:20px;perspective:1000px}
+.fc{width:100%;max-width:340px;height:200px;cursor:pointer;user-select:none}
+.fci{width:100%;height:100%;position:relative;transform-style:preserve-3d;transition:transform .4s cubic-bezier(.4,0,.2,1)}
+.fc.flip .fci{transform:rotateY(180deg)}
+.cfront,.cback{position:absolute;inset:0;backface-visibility:hidden;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px}
+.cfront{background:var(--accent)}
+.cback{background:#0EA5E9;transform:rotateY(180deg)}
+.cflag{font-size:32px}
+.ctxt{font-size:20px;font-weight:600;color:#fff;text-align:center;line-height:1.3}
+.chint{text-align:center;font-size:12px;color:var(--text3);padding:8px;flex-shrink:0}
+.cact{display:flex;justify-content:center;gap:32px;padding:12px 16px 20px;flex-shrink:0}
+.ab{width:52px;height:52px;border-radius:50%;border:.5px solid var(--border);background:var(--surface);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.ab.p{background:var(--accent);color:#fff;border-color:var(--accent)}
+#scomplete{position:absolute;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center}
+#fsession{display:flex;flex-direction:column;height:100%;position:relative}
+.compcard{text-align:center;padding:40px 24px}
+.compico{width:64px;height:64px;border-radius:50%;background:var(--success-light);color:var(--success);font-size:28px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.compcard h2{font-size:22px;margin-bottom:8px}
+.compcard p{color:var(--text2);margin-bottom:24px}
+#stcontent{flex:1;overflow-y:auto;padding:16px}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.scard{background:var(--surface);border:.5px solid var(--border);border-radius:var(--r);padding:16px}
+.slbl{font-size:12px;color:var(--text3);margin-bottom:4px}
+.sval{font-size:24px;font-weight:600}
+.stitle{font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em}
+.si{background:var(--surface);border:.5px solid var(--border);border-radius:var(--rs);padding:12px 14px;margin-bottom:8px}
+.sirow{display:flex;justify-content:space-between;align-items:center}
+.sdate{font-size:14px;font-weight:500}
+.sdur{font-size:14px;color:var(--text2);font-variant-numeric:tabular-nums}
+.smeta{font-size:12px;color:var(--text3);margin-top:3px}
+.modal{position:fixed;inset:0;z-index:100;display:flex;align-items:flex-end}
+.modal.h{display:none}
+.mbk{position:absolute;inset:0;background:rgba(0,0,0,.4)}
+.msh{position:relative;width:100%;background:var(--surface);border-radius:20px 20px 0 0;max-height:92dvh;display:flex;flex-direction:column;padding-bottom:var(--safe)}
+.mhdr{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px;border-bottom:.5px solid var(--border);flex-shrink:0}
+.mhdr h2{font-size:18px;font-weight:600}
+.mcls{width:32px;height:32px;border-radius:50%;border:none;background:var(--bg);color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.mbdy{overflow-y:auto;padding:16px;flex:1;display:flex;flex-direction:column;gap:14px}
+.mftr{padding:12px 16px;border-top:.5px solid var(--border);flex-shrink:0}
+.fg{display:flex;flex-direction:column}
+.ir{display:flex;gap:8px;align-items:center}
+.ir .if{flex:1}
+.spi{width:36px;height:36px;border-radius:50%;border:.5px solid var(--border);background:none;color:var(--accent);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.trb{margin-top:6px;display:flex;align-items:center;gap:6px;background:none;border:.5px solid var(--border);border-radius:var(--rs);padding:7px 12px;font-size:13px;color:var(--text2);cursor:pointer}
+.trb.ld{opacity:.6;pointer-events:none}
+.vb{margin-top:6px;padding:8px 12px;border-radius:var(--rs);font-size:13px;line-height:1.4}
+.vb.err{background:var(--warn-light);color:var(--warn);border:.5px solid #FDE68A}
+.vb.ok{background:var(--success-light);color:var(--success)}
+.uc{margin-top:6px;padding:4px 10px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:12px;cursor:pointer}
+.cpk{display:flex;gap:10px;flex-wrap:wrap}
+.csw{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent}
+.csw.on{border-color:var(--text)}
+.h{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+  <nav id="nav">
+    <button class="nb on" data-tab="library">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span>Library</span>
+    </button>
+    <button class="nb" data-tab="categories">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      <span>Categories</span>
+    </button>
+    <button class="nb" data-tab="flashcards">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      <span>Flashcards</span>
+    </button>
+    <button class="nb" data-tab="stats">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Stats</span>
+    </button>
+  </nav>
+
+  <main id="main">
+    <section id="tab-library" class="tab on">
+      <header class="ph">
+        <h1>PhraseZine</h1>
+        <div class="ha">
+          <button class="ib" id="exportBtn" title="Export">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </button>
+          <button class="ib p" id="addPhraseBtn" title="Add">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      </header>
+      <div class="sb">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="searchInput" placeholder="Search phrases..."/>
+      </div>
+      <div class="pills" id="catPills"></div>
+      <div id="plist"></div>
+    </section>
+
+    <section id="tab-categories" class="tab">
+      <header class="ph">
+        <h1>Categories</h1>
+        <button class="ib p" id="addCatBtn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </header>
+      <div id="clist"></div>
+    </section>
+
+    <section id="tab-flashcards" class="tab">
+      <div id="fsetup">
+        <header class="ph"><h1>Flashcards</h1></header>
+        <div class="sc">
+          <label class="fl">Category</label>
+          <select id="fcCat" class="if"><option value="all">All Phrases</option></select>
+          <label class="fl" style="margin-top:16px">Start with</label>
+          <div class="seg">
+            <button class="sg on" data-lang="en">🇬🇧 English</button>
+            <button class="sg" data-lang="fr">🇫🇷 French</button>
+          </div>
+          <div class="fcc" id="fcCount"></div>
+          <button class="bp fw" id="startBtn">Start Session</button>
+        </div>
+      </div>
+      <div id="fsession" class="h">
+        <div class="shdr">
+          <button class="tb d" id="endBtn">End</button>
+          <span id="sprog"></span>
+          <span class="mono" id="stimer">00:00</span>
+        </div>
+        <div class="pbar"><div id="pfill"></div></div>
+        <div id="ccon">
+          <div class="fc" id="flashcard">
+            <div class="fci">
+              <div class="cfront"><div class="cflag" id="fflag"></div><div class="ctxt" id="ftxt"></div></div>
+              <div class="cback"><div class="cflag" id="bflag"></div><div class="ctxt" id="btxt"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="chint" id="chint">Tap to flip · Swipe to advance</div>
+        <div class="cact" id="cact">
+          <button class="ab" id="speakBtn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          </button>
+          <button class="ab p" id="nextBtn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 16 16 12 12 8"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          </button>
+        </div>
+        <div id="scomplete" class="h">
+          <div class="compcard">
+            <div class="compico">✓</div>
+            <h2>Session complete!</h2>
+            <p id="compMsg"></p>
+            <button class="bp" id="doneBtn">Done</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-stats" class="tab">
+      <header class="ph"><h1>Stats</h1></header>
+      <div id="stcontent"></div>
+    </section>
+  </main>
+</div>
+
+<!-- Phrase Modal -->
+<div id="phraseModal" class="modal h">
+  <div class="mbk"></div>
+  <div class="msh">
+    <div class="mhdr">
+      <h2 id="modalTitle">New Phrase</h2>
+      <button class="mcls">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="mbdy">
+      <input type="hidden" id="phraseId"/>
+      <div class="fg">
+        <label class="fl">English</label>
+        <div class="ir">
+          <input type="text" id="inEn" class="if" placeholder="Enter English phrase"/>
+          <button class="spi" data-lang="en">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          </button>
+        </div>
+        <div class="vb h" id="enVal"></div>
+        <button class="trb" id="trToFr">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Translate to French (DeepL)
+        </button>
+      </div>
+      <div class="fg">
+        <label class="fl">French</label>
+        <div class="ir">
+          <input type="text" id="inFr" class="if" placeholder="Enter French phrase"/>
+          <button class="spi" data-lang="fr">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          </button>
+        </div>
+        <div class="vb h" id="frVal"></div>
+        <button class="trb" id="trToEn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Translate to English (DeepL)
+        </button>
+      </div>
+      <div class="fg">
+        <label class="fl">Notes (optional)</label>
+        <textarea id="inNotes" class="if" rows="2" placeholder="Any notes..."></textarea>
+      </div>
+      <div class="fg">
+        <label class="fl">Category</label>
+        <select id="inCat" class="if"><option value="">None</option></select>
+      </div>
+    </div>
+    <div class="mftr"><button class="bp fw" id="savePhraseBtn">Save Phrase</button></div>
+  </div>
+</div>
+
+<!-- Category Modal -->
+<div id="catModal" class="modal h">
+  <div class="mbk"></div>
+  <div class="msh">
+    <div class="mhdr">
+      <h2>New Category</h2>
+      <button class="mcls">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="mbdy">
+      <div class="fg">
+        <label class="fl">Name</label>
+        <input type="text" id="catName" class="if" placeholder="e.g. Verbs, Food, Places..."/>
+      </div>
+      <div class="fg">
+        <label class="fl">Color</label>
+        <div class="cpk" id="colorPicker"></div>
+      </div>
+    </div>
+    <div class="mftr"><button class="bp fw" id="saveCatBtn">Save Category</button></div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const DB = {
+  get phrases(){ try{return JSON.parse(localStorage.getItem('pz_p')||'[]')}catch{return[]} },
+  set phrases(v){ localStorage.setItem('pz_p',JSON.stringify(v)) },
+  get cats(){ try{return JSON.parse(localStorage.getItem('pz_c')||'[]')}catch{return[]} },
+  set cats(v){ localStorage.setItem('pz_c',JSON.stringify(v)) },
+  get sessions(){ try{return JSON.parse(localStorage.getItem('pz_s')||'[]')}catch{return[]} },
+  set sessions(v){ localStorage.setItem('pz_s',JSON.stringify(v)) },
+  addPhrase(d){ const p=this.phrases; const n={id:Date.now().toString(),dateAdded:new Date().toISOString(),studyCount:0,lastStudied:null,...d}; p.unshift(n); this.phrases=p; return n },
+  updatePhrase(id,d){ const p=this.phrases; const i=p.findIndex(x=>x.id===id); if(i>-1){p[i]={...p[i],...d};this.phrases=p} },
+  deletePhrase(id){ this.phrases=this.phrases.filter(p=>p.id!==id) },
+  addCat(d){ const c=this.cats; const n={id:Date.now().toString(),...d}; c.push(n); this.cats=c; return n },
+  deleteCat(id){ this.cats=this.cats.filter(c=>c.id!==id); const p=this.phrases; p.forEach(x=>{if(x.categoryId===id)x.categoryId=null}); this.phrases=p },
+  addSession(d){ const s=this.sessions; s.unshift({id:Date.now().toString(),date:new Date().toISOString(),...d}); this.sessions=s }
+};
+
+const SEED=[
+  ["J'ai perdu beaucoup de gens dans ma vie, mais toi je refuse de te perdre","I've lost many people in my life, but I refuse to lose you"],
+  ["Quand j'apprends une dinguerie et que je sais parfaitement à qui je vais la raconter","When I learn something crazy and I know exactly who I'm going to tell it to"],
+  ["Hôpital","Hospital"],["Joie de vivre","Joy of living"],["Bien sûr","Of course"],
+  ["Bon y va","Well, let's go"],["On y va","Let's go"],["Comme","Like"],
+  ["Je pense que je me trompe","I think I am wrong"],["Avoir tort","To be wrong"],
+  ["Autre","Other"],["C'est ça","That's it / That's right"],
+  ["Vous sortez l'ascenseur","You exit the elevator"],["Alors","So / Then / Well"],
+  ["Lorsque","When"],["Ça sera sur la droite","It will be on the right"],
+  ["Wow la classe !","Wow, how stylish!"],["J'espère que ça vous convient","I hope this works for you"],
+  ["Oui, ça me va","Yes, it works for me"],["Ouais","Yeah"],["Hier","Yesterday"],
+  ["La semaine dernière","Last week"],["Le mois dernier","Last month"],["L'année dernière","Last year"],
+  ["Je vous retrouve","I'll meet up with you again"],["Trouver","To find (a new discovery)"],
+  ["Retrouver","To find again"],["Prêté","Lent / Borrowed"],["C'est parti !","Here we go!"],
+  ["Vous êtes combien ?","How many are you?"],["C'est pour deux personnes","It's for two people"],
+  ["Suivez-moi","Follow me"],["Vous avez choisi ?","Are you ready to order?"],
+  ["Tout de suite","Immediately / Right away"],["L'addition","The bill / The check"],
+  ["Vous apportez l'addition s'il vous plaît ?","Could you bring the bill please?"],
+  ["C'était ?","How was it?"],["Parfois","Sometimes"],
+  ["Tout le monde a un parapluie","Everyone has an umbrella"],["Cuire / Cuisiner","To cook"],
+  ["Il n'y a pas de quoi","You're welcome"],["Voici","Here is"],
+  ["Voilà","There it is"],["Ici","Here"],["Comme ci comme ça","So-so"],
+  ["Quoi","What"],["Chacun","Each one / Everyone"],
+  ["Super, merci !","Great, thank you!"],["Aujourd'hui","Today"],
+  ["D'abord","First / First of all"],["Lancer","To launch / To throw"],
+  ["Étends","Stretch / Lie down"],["Je suis très fière de toi","I am very proud of you"],
+  ["Trop","Too / Too much"],["Assez","Quite / Enough"],["Extrêmement","Extremely"],
+  ["Est-ce qu'on peut chanter ?","Can we sing?"],["Du coup, moi c'est Tim","So, I'm Tim"],
+  ["Espère","Hope"],["Où sont les poubelles ?","Where are the trash cans?"],
+  ["Où est-ce que je peux acheter des vêtements ?","Where can I buy clothes?"],
+  ["Je peux vous aider ?","Can I help you?"],["Je regarde","I'm just looking"],
+  ["Est-ce que je peux l'essayer ?","Can I try it on?"],["Lèche-vitrines","Window shopping"],
+  ["Ça coûte combien ?","How much does it cost?"],["Ça coûte trente euros","That costs thirty euros"],
+  ["Est-ce que je peux payer avec une carte de crédit ?","Can I pay with a credit card?"],
+  ["Voulez-vous un sac ?","Would you like a bag?"],["Le ticket","The ticket"],
+  ["Je voudrais acheter des oranges","I would like to buy some oranges"],
+  ["C'est gentil","That's kind / That's nice"],["Ils sont à combien ?","How much are they?"],
+  ["J'habite à côté","I live nearby"],["J'ai dit","I said"],
+  ["Par contre","On the other hand / However"],["Tant pis","Too bad / Never mind"],
+  ["Attendez !","Wait!"],["Je vais régler par carte","I'll pay by card"],
+  ["Mec","Dude / Guy"],["Pote","Buddy / Pal"],
+  ["Un peu plus","A little more"],["Un peu moins","A little less"],
+  ["Comment tu vas ?","How are you?"],["Je vais bien","I'm doing well"],
+  ["Et quoi d'autre ?","And what else?"],["Demi","Half"],["Déjà","Already"],
+  ["Je me sens déjà pompette","I already feel tipsy"],["Santé","Cheers / Health"],
+  ["J'ai mal à la tête","I have a headache"],
+  ["Où se trouvent les toilettes ?","Where are the restrooms?"],["Je la prends","I'll take it"],
+  ["Est-ce que je peux goûter s'il vous plaît ?","Can I taste it please?"],
+  ["Quelque chose","Something"],["On est dans l'aéroport","We are in the airport"],
+  ["Non ça va !","No, it's fine!"],
+  ["J'ai étudié le français à l'école mais j'ai tout oublié","I studied French at school but I forgot everything"],
+  ["À côté de","Next to / Beside"],["Entre","Between"],
+  ["Plus cher","More expensive"],["Vous êtes d'où ?","Where are you from?"],
+  ["Nous sommes d'Écosse","We are from Scotland"],
+  ["Qu'est-ce que tu fais pour le travail ?","What do you do for work?"],
+  ["J'en sais rien","I have no idea"],["Aucune idée","No idea"],
+  ["J'apprends le français depuis un mois","I've been learning French for a month"],
+  ["Qu'est-ce qu'on peut faire ?","What can we do?"],
+  ["J'ai besoin de me concentrer","I need to focus"],["Avant de dormir","Before sleeping"],
+  ["N'oublie jamais","Never forget"],["Pas encore","Not yet"],
+  ["Avoir de la chance","To be lucky"],["C'est pas grave","It's not a problem / No worries"],
+  ["Celui-là","That one"],["À la semaine prochaine !","See you next week!"],
+  ["À la prochaine fois !","Until next time!"],["Se demander","To wonder"],
+  ["Tout droit","Straight ahead"],["Au cas où","Just in case"],
+  ["Je ne me sens pas bien","I do not feel well"],
+  ["Je fais beaucoup de fautes","I make a lot of mistakes"],
+  ["Presque","Nearly / Almost"],["Vous avez quel âge ?","How old are you?"],
+  ["Toujours","Always"],["Pendant","During"],["Où","Where"],["Enfance","Childhood"],
+  ["Je le vois","I see him"],["Je la vois","I see her"],["Tout est bon !","Everything is good"],
+  ["Je vous en prie","You're welcome"],["Voulez-vous attendre ?","Do you want to wait?"],
+  ["Vitraux","Stained glass windows"],["On peut manger ici ?","Can we eat here?"],
+  ["Quelquefois","Sometimes"],["Chambre","Bedroom"],["Fois","Times"],
+  ["Même","Same / Even"],["Parfait","Perfect"],["Prendre des notes","To take notes"],
+  ["Donc","So / Therefore"],["D'où viens-tu ?","Where are you from?"],
+  ["Plus lentement","More slowly"],["Je viens de...","I come from..."],
+  ["Où se trouve la piscine ?","Where is the swimming pool?"],["Parce que","Because"],
+  ["Loisirs","Hobbies"],["Jamais","Never"],["Demain","Tomorrow"],
+  ["Chaque fois","Every time"],["Partout","Everywhere"],["Gauche","Left"],
+  ["Droite","Right"],["Devant","In front of"],["Derrière","Behind"],
+  ["Jardiner","To garden"],["Plantes","Plants"],["Arbres","Trees"],
+  ["Meilleur(e)","Best"],["Je ne parle pas très bien français","I don't speak French very well"],
+  ["Combien","How many"],["Pour la plupart","For the most part"],
+  ["Oiseaux","Birds"],["Peinture","Painting"],["Le tableau","The painting"],
+  ["On dirait qu'il neige","It looks like it is snowing"],
+  ["Il y a beaucoup de chiens","There are a lot of dogs"],
+  ["Pull","Sweater"],["Poulet","Chicken"],["Poule","Hen / Chicken"],
+  ["Quand","When"],["Depuis","Since"]
+];
+
+function seedIfNeeded(){
+  if(localStorage.getItem('pz_seeded')==='1') return;
+  const base=Date.now()-SEED.length*1000;
+  const phrases=[];
+  SEED.forEach((p,i)=>{
+    phrases.push({id:(base+i).toString(),dateAdded:new Date(base+i*1000).toISOString(),studyCount:0,lastStudied:null,french:p[0],english:p[1],notes:'',categoryId:null});
+  });
+  localStorage.setItem('pz_p',JSON.stringify(phrases));
+  localStorage.setItem('pz_seeded','1');
+}
+
+// ── SPEECH ────────────────────────────────────────────────────────────────────
+function speak(text,lang){
+  if(!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=lang==='fr'?'fr-FR':'en-US';
+  u.rate=0.9;
+  speechSynthesis.speak(u);
+}
+
+// ── TRANSLATE ─────────────────────────────────────────────────────────────────
+async function deepl(text,target){
+  const r=await fetch('https://api-free.deepl.com/v2/translate',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'DeepL-Auth-Key 06b5458d-7db6-4f61-9e56-c66e140829e0:fx'},
+    body:JSON.stringify({text:[text],target_lang:target.toUpperCase()})
+  });
+  if(!r.ok) throw new Error('DeepL error '+r.status);
+  const d=await r.json();
+  return d.translations?.[0]?.text||'';
+}
+
+// ── VALIDATE ──────────────────────────────────────────────────────────────────
+const vtimers={};
+function validateDebounce(key,text,lang,cb){
+  clearTimeout(vtimers[key]);
+  if(!text||text.trim().length<3){cb(null);return}
+  vtimers[key]=setTimeout(async()=>{
+    try{
+      const lc=lang==='fr'?'fr':'en-US';
+      const body=new URLSearchParams({text,language:lc,enabledOnly:'false'});
+      const r=await fetch('https://api.languagetool.org/v2/check',{method:'POST',body});
+      if(!r.ok){cb(null);return}
+      const d=await r.json();
+      if(!d.matches||d.matches.length===0){cb({ok:true});return}
+      let corrected=text;
+      const sorted=[...d.matches].filter(m=>m.replacements.length>0).sort((a,b)=>b.offset-a.offset);
+      for(const m of sorted){corrected=corrected.slice(0,m.offset)+m.replacements[0].value+corrected.slice(m.offset+m.length)}
+      cb({ok:false,corrected:corrected!==text?corrected:null,explanation:d.matches.map(m=>m.message).join(' · ')});
+    }catch{cb(null)}
+  },900);
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fmtTime(s){const m=Math.floor(s/60),sec=s%60;return String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0')}
+const COLORS=['#4F46E5','#0EA5E9','#16A34A','#DC2626','#D97706','#9333EA','#EC4899','#0D9488'];
+
+// ── APP STATE ─────────────────────────────────────────────────────────────────
+let activeCat=null, searchQ='', selColor=COLORS[0];
+let session=null, stimer=null, ssecs=0, txStart=0, tyStart=0;
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderAll(){
+  renderPhrases(); renderCatPills(); renderCatList();
+  populateCatSelects(); updateFCCount();
+}
+
+function renderPhrases(){
+  let p=DB.phrases;
+  if(activeCat) p=p.filter(x=>x.categoryId===activeCat);
+  if(searchQ){const q=searchQ.toLowerCase();p=p.filter(x=>x.english.toLowerCase().includes(q)||x.french.toLowerCase().includes(q))}
+  const cats=Object.fromEntries(DB.cats.map(c=>[c.id,c]));
+  const el=document.getElementById('plist');
+  if(!p.length){el.innerHTML='<div class="empty">No phrases yet — tap + to add one!</div>';return}
+  el.innerHTML=p.map(p=>{
+    const cat=cats[p.categoryId];
+    const badge=cat?`<span class="pbadge" style="background:${cat.color}22;color:${cat.color}">${esc(cat.name)}</span>`:'';
+    return`<div class="pi" data-id="${p.id}">
+      <div class="pit"><div class="pen">${esc(p.english)}</div><div class="pfr">${esc(p.french)}</div>${badge}</div>
+      <div class="pas">
+        <button class="ssm" data-text="${esc(p.english)}" data-lang="en">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
+        <button class="ssm" data-text="${esc(p.french)}" data-lang="fr">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        </button>
+      </div>
+    </div>`}).join('');
+}
+
+function renderCatPills(){
+  const el=document.getElementById('catPills');
+  el.innerHTML=`<button class="pill${!activeCat?' on':''}" data-cat="">All</button>`+
+    DB.cats.map(c=>`<button class="pill${activeCat===c.id?' on':''}" data-cat="${c.id}" ${activeCat===c.id?`style="background:${c.color};border-color:${c.color};color:#fff"`:'']}>${esc(c.name)}</button>`).join('');
+}
+
+function renderCatList(){
+  const el=document.getElementById('clist');
+  const phrases=DB.phrases;
+  if(!DB.cats.length){el.innerHTML='<div class="empty">No categories yet.</div>';return}
+  el.innerHTML=DB.cats.map(c=>{
+    const cnt=phrases.filter(p=>p.categoryId===c.id).length;
+    return`<div class="ci">
+      <div class="cdot" style="background:${c.color}"></div>
+      <div class="cname">${esc(c.name)}</div>
+      <div class="ccnt">${cnt} phrase${cnt!==1?'s':''}</div>
+      <button class="cdel" data-id="${c.id}">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`}).join('');
+}
+
+function renderStats(){
+  const phrases=DB.phrases, sessions=DB.sessions;
+  const totalTime=sessions.reduce((s,x)=>s+(x.durationSeconds||0),0);
+  const totalRev=phrases.reduce((s,p)=>s+(p.studyCount||0),0);
+  const fdate=d=>new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+  document.getElementById('stcontent').innerHTML=
+    `<div class="sgrid">
+      <div class="scard"><div class="slbl">Total phrases</div><div class="sval">${phrases.length}</div></div>
+      <div class="scard"><div class="slbl">Total reviews</div><div class="sval">${totalRev}</div></div>
+      <div class="scard"><div class="slbl">Study time</div><div class="sval">${fmtTime(totalTime)}</div></div>
+      <div class="scard"><div class="slbl">Sessions</div><div class="sval">${sessions.length}</div></div>
+    </div>
+    <div class="stitle">Recent sessions</div>
+    ${sessions.slice(0,10).map(s=>`
+      <div class="si">
+        <div class="sirow"><span class="sdate">${fdate(s.date)}</span><span class="sdur">${fmtTime(s.durationSeconds||0)}</span></div>
+        <div class="smeta">${s.phrasesReviewed} phrases${s.categoryName?' · '+esc(s.categoryName):''}</div>
+      </div>`).join('')||'<p style="color:var(--text3);font-size:14px">No sessions yet.</p>'}`;
+}
+
+function populateCatSelects(){
+  const cats=DB.cats;
+  document.getElementById('inCat').innerHTML='<option value="">None</option>'+cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  document.getElementById('fcCat').innerHTML='<option value="all">All Phrases</option>'+cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+}
+
+function updateFCCount(){
+  const v=document.getElementById('fcCat').value;
+  const p=v==='all'?DB.phrases:DB.phrases.filter(x=>x.categoryId===v);
+  document.getElementById('fcCount').textContent=`${p.length} phrase${p.length!==1?'s':''} available`;
+  document.getElementById('startBtn').disabled=p.length===0;
+}
+
+function showVal(elId,result){
+  const el=document.getElementById(elId);
+  if(!result||result.ok===true){el.classList.add('h');return}
+  el.className='vb err';
+  el.classList.remove('h');
+  el.innerHTML=esc(result.explanation)+(result.corrected?`<br><strong>Suggestion: ${esc(result.corrected)}</strong><br><button class="uc" data-target="${elId}" data-val="${esc(result.corrected)}">Use this</button>`:'');
+}
+
+// ── SESSION ───────────────────────────────────────────────────────────────────
+function startSession(){
+  const v=document.getElementById('fcCat').value;
+  const all=v==='all'?DB.phrases:DB.phrases.filter(p=>p.categoryId===v);
+  const phrases=[...all].sort(()=>Math.random()-.5);
+  const lang=document.querySelector('.sg.on').dataset.lang;
+  const catName=v!=='all'?DB.cats.find(c=>c.id===v)?.name:null;
+  session={phrases,index:0,lang,catName};
+  ssecs=0;
+  document.getElementById('fsetup').classList.add('h');
+  document.getElementById('fsession').classList.remove('h');
+  document.getElementById('scomplete').classList.add('h');
+  document.getElementById('ccon').classList.remove('h');
+  document.getElementById('cact').classList.remove('h');
+  document.getElementById('chint').classList.remove('h');
+  clearInterval(stimer);
+  stimer=setInterval(()=>{
+    ssecs++;
+    document.getElementById('stimer').textContent=fmtTime(ssecs);
+  },1000);
+  renderCard();
+}
+
+function renderCard(){
+  if(!session) return;
+  const {phrases,index,lang}=session;
+  if(index>=phrases.length){showComplete();return}
+  const p=phrases[index];
+  document.getElementById('sprog').textContent=`${index+1} / ${phrases.length}`;
+  document.getElementById('pfill').style.width=`${(index/phrases.length)*100}%`;
+  document.getElementById('fflag').textContent=lang==='en'?'🇬🇧':'🇫🇷';
+  document.getElementById('ftxt').textContent=lang==='en'?p.english:p.french;
+  document.getElementById('bflag').textContent=lang==='en'?'🇫🇷':'🇬🇧';
+  document.getElementById('btxt').textContent=lang==='en'?p.french:p.english;
+  document.getElementById('flashcard').classList.remove('flip');
+}
+
+function nextCard(){
+  if(!session) return;
+  const p=session.phrases[session.index];
+  DB.updatePhrase(p.id,{studyCount:(p.studyCount||0)+1,lastStudied:new Date().toISOString()});
+  session.index++;
+  renderCard();
+}
+
+function showComplete(){
+  clearInterval(stimer);
+  document.getElementById('ccon').classList.add('h');
+  document.getElementById('cact').classList.add('h');
+  document.getElementById('chint').classList.add('h');
+  document.getElementById('scomplete').classList.remove('h');
+  document.getElementById('compMsg').textContent=`You reviewed ${session.phrases.length} phrases in ${fmtTime(ssecs)}.`;
+  DB.addSession({durationSeconds:ssecs,phrasesReviewed:session.phrases.length,categoryName:session.catName});
+}
+
+function endSession(){
+  clearInterval(stimer);
+  if(session&&session.index>0) DB.addSession({durationSeconds:ssecs,phrasesReviewed:session.index,categoryName:session.catName});
+  session=null;
+  document.getElementById('fsession').classList.add('h');
+  document.getElementById('fsetup').classList.remove('h');
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+function doExport(){
+  const cats=Object.fromEntries(DB.cats.map(c=>[c.id,c]));
+  const grouped={};
+  DB.phrases.forEach(p=>{const k=cats[p.categoryId]?.name||'Uncategorized';if(!grouped[k])grouped[k]=[];grouped[k].push(p)});
+  let out=`PhraseZine Export\nGenerated: ${new Date().toLocaleString()}\nTotal: ${DB.phrases.length} phrases\n\n`;
+  for(const k of Object.keys(grouped).sort()){
+    out+=`[${k.toUpperCase()}]\n\n`;
+    grouped[k].forEach(p=>{out+=`FR: ${p.french}\nEN: ${p.english}\n${p.notes?`    Note: ${p.notes}\n`:''}\n`});
+    out+='-'.repeat(50)+'\n\n';
+  }
+  const b=new Blob([out],{type:'text/plain'});
+  const u=URL.createObjectURL(b);
+  const a=document.createElement('a');
+  a.href=u;a.download=`PhraseZine_${new Date().toISOString().slice(0,10)}.txt`;
+  a.click();URL.revokeObjectURL(u);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  seedIfNeeded();
+
+  // Nav
+  document.querySelectorAll('.nb').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const tab=btn.dataset.tab;
+      document.querySelectorAll('.nb').forEach(b=>b.classList.toggle('on',b===btn));
+      document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.id===`tab-${tab}`));
+      if(tab==='stats') renderStats();
+    });
+  });
+
+  // Search
+  document.getElementById('searchInput').addEventListener('input',e=>{
+    searchQ=e.target.value;renderPhrases();
+  });
+
+  // Category pills
+  document.getElementById('catPills').addEventListener('click',e=>{
+    const pill=e.target.closest('.pill');
+    if(!pill) return;
+    activeCat=pill.dataset.cat||null;
+    renderCatPills();renderPhrases();
+  });
+
+  // Phrase list click (speak or edit)
+  document.getElementById('plist').addEventListener('click',e=>{
+    const spk=e.target.closest('.ssm');
+    if(spk){e.stopPropagation();speak(spk.dataset.text,spk.dataset.lang);return}
+    const item=e.target.closest('.pi');
+    if(item) openPhraseModal(item.dataset.id);
+  });
+
+  // Add / export buttons
+  document.getElementById('addPhraseBtn').addEventListener('click',()=>openPhraseModal(null));
+  document.getElementById('exportBtn').addEventListener('click',doExport);
+  document.getElementById('addCatBtn').addEventListener('click',()=>{
+    selColor=COLORS[0];
+    renderColorPicker();
+    document.getElementById('catName').value='';
+    document.getElementById('catModal').classList.remove('h');
+  });
+
+  // Category list delete
+  document.getElementById('clist').addEventListener('click',e=>{
+    const del=e.target.closest('.cdel');
+    if(del&&confirm('Delete this category?')){DB.deleteCat(del.dataset.id);renderAll()}
+  });
+
+  // Color picker
+  document.getElementById('colorPicker').addEventListener('click',e=>{
+    const sw=e.target.closest('.csw');
+    if(!sw) return;
+    selColor=sw.dataset.color;
+    document.querySelectorAll('.csw').forEach(s=>s.classList.toggle('on',s.dataset.color===selColor));
+  });
+
+  // Save category
+  document.getElementById('saveCatBtn').addEventListener('click',()=>{
+    const name=document.getElementById('catName').value.trim();
+    if(!name) return;
+    DB.addCat({name,color:selColor});
+    document.getElementById('catModal').classList.add('h');
+    renderAll();
+  });
+
+  // Flashcard controls
+  document.querySelectorAll('.sg').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.sg').forEach(b=>b.classList.toggle('on',b===btn));
+    });
+  });
+  document.getElementById('fcCat').addEventListener('change',updateFCCount);
+  document.getElementById('startBtn').addEventListener('click',startSession);
+  document.getElementById('endBtn').addEventListener('click',()=>{endSession();});
+  document.getElementById('doneBtn').addEventListener('click',()=>{endSession();});
+  document.getElementById('nextBtn').addEventListener('click',nextCard);
+  document.getElementById('speakBtn').addEventListener('click',()=>{
+    if(!session) return;
+    const p=session.phrases[session.index];
+    if(!p) return;
+    const flipped=document.getElementById('flashcard').classList.contains('flip');
+    const l=flipped?(session.lang==='en'?'fr':'en'):session.lang;
+    speak(l==='en'?p.english:p.french,l);
+  });
+
+  // Flashcard tap + swipe
+  const fc=document.getElementById('flashcard');
+  fc.addEventListener('click',()=>fc.classList.toggle('flip'));
+  fc.addEventListener('touchstart',e=>{txStart=e.touches[0].clientX;tyStart=e.touches[0].clientY},{passive:true});
+  fc.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-txStart;
+    const dy=e.changedTouches[0].clientY-tyStart;
+    if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)) nextCard();
+  });
+
+  // Phrase modal
+  const inEn=document.getElementById('inEn');
+  const inFr=document.getElementById('inFr');
+
+  inEn.addEventListener('input',()=>validateDebounce('en',inEn.value,'en',r=>showVal('enVal',r)));
+  inFr.addEventListener('input',()=>validateDebounce('fr',inFr.value,'fr',r=>showVal('frVal',r)));
+
+  document.querySelectorAll('.spi').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const l=btn.dataset.lang;
+      speak(l==='en'?inEn.value:inFr.value,l);
+    });
+  });
+
+  document.getElementById('trToFr').addEventListener('click',async()=>{
+    const t=inEn.value.trim();if(!t)return;
+    const btn=document.getElementById('trToFr');
+    btn.textContent='Translating...';btn.classList.add('ld');
+    try{inFr.value=await deepl(t,'FR')}catch(e){alert('Translation failed: '+e.message)}
+    btn.textContent='Translate to French (DeepL)';btn.classList.remove('ld');
+  });
+
+  document.getElementById('trToEn').addEventListener('click',async()=>{
+    const t=inFr.value.trim();if(!t)return;
+    const btn=document.getElementById('trToEn');
+    btn.textContent='Translating...';btn.classList.add('ld');
+    try{inEn.value=await deepl(t,'EN')}catch(e){alert('Translation failed: '+e.message)}
+    btn.textContent='Translate to English (DeepL)';btn.classList.remove('ld');
+  });
+
+  // Use correction
+  document.addEventListener('click',e=>{
+    const btn=e.target.closest('.uc');
+    if(!btn) return;
+    if(btn.dataset.target==='enVal') inEn.value=btn.dataset.val;
+    if(btn.dataset.target==='frVal') inFr.value=btn.dataset.val;
+    document.getElementById(btn.dataset.target).classList.add('h');
+  });
+
+  document.getElementById('savePhraseBtn').addEventListener('click',()=>{
+    const en=inEn.value.trim(),fr=inFr.value.trim();
+    if(!en||!fr){alert('Please fill in both fields.');return}
+    const id=document.getElementById('phraseId').value;
+    const data={english:en,french:fr,notes:document.getElementById('inNotes').value.trim(),categoryId:document.getElementById('inCat').value||null};
+    if(id) DB.updatePhrase(id,data); else DB.addPhrase(data);
+    document.getElementById('phraseModal').classList.add('h');
+    renderAll();
+  });
+
+  // Close modals
+  document.querySelectorAll('.mbk,.mcls').forEach(el=>{
+    el.addEventListener('click',()=>{
+      document.querySelectorAll('.modal').forEach(m=>m.classList.add('h'));
+    });
+  });
+
+  renderAll();
+});
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function openPhraseModal(id){
+  const p=id?DB.phrases.find(x=>x.id===id):null;
+  document.getElementById('phraseId').value=id||'';
+  document.getElementById('modalTitle').textContent=p?'Edit Phrase':'New Phrase';
+  document.getElementById('inEn').value=p?.english||'';
+  document.getElementById('inFr').value=p?.french||'';
+  document.getElementById('inNotes').value=p?.notes||'';
+  document.getElementById('enVal').classList.add('h');
+  document.getElementById('frVal').classList.add('h');
+  populateCatSelects();
+  if(p) document.getElementById('inCat').value=p.categoryId||'';
+  document.getElementById('phraseModal').classList.remove('h');
+}
+
+function renderColorPicker(){
+  document.getElementById('colorPicker').innerHTML=COLORS.map(c=>
+    `<div class="csw${c===selColor?' on':''}" data-color="${c}" style="background:${c}"></div>`
+  ).join('');
+}
+
+// ── SERVICE WORKER ────────────────────────────────────────────────────────────
+if('serviceWorker' in navigator){
+  const swCode=`
+const C='pz-v1';
+const A=['./'];
+self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A)));self.skipWaiting()});
+self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))));self.clients.claim()});
+self.addEventListener('fetch',e=>{
+  if(e.request.method!=='GET')return;
+  if(e.request.url.includes('languagetool')||e.request.url.includes('deepl'))return;
+  e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
+});`;
+  const blob=new Blob([swCode],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(blob));
+}
+</script>
+</body>
+</html>
